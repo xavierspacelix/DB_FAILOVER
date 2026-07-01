@@ -1,4 +1,4 @@
-# Instalasi Node A — 10.30.13.12
+# Instalasi Node A — 10.30.110.114
 
 **Layanan:** etcd (Node 2) + HAProxy + Keepalived (MASTER)  
 **Dokumentasi 2026:** [etcd v3.6 config](https://etcd.io/docs/v3.6/op-guide/configuration/) • [HAProxy 3.4](http://docs.haproxy.org/3.4/configuration.html) • [Keepalived 2.4](https://www.keepalived.org/documentation/keepalived-conf/)
@@ -10,7 +10,7 @@
 - Rocky Linux 9.7
 - Akses root
 - File `/root/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
-- File config: `etcd-node-a-10.30.13.12.conf`, `haproxy.cfg`, `keepalived-master-10.30.13.12.conf`
+- File config: `etcd-node-a-10.30.110.114.conf`, `haproxy.cfg`, `keepalived-master-10.30.110.114.conf`
 
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
@@ -40,7 +40,7 @@ dnf install --disablerepo='*' --enablerepo=local-offline -y \
 Copy config:
 
 ```bash
-cp /root/etcd-node-a-10.30.13.12.conf /etc/etcd/etcd.conf
+cp /root/etcd-node-a-10.30.110.114.conf /etc/etcd/etcd.conf
 ```
 
 Isi konfigurasi — etcd 3.6 menggunakan environment variables:
@@ -48,11 +48,11 @@ Isi konfigurasi — etcd 3.6 menggunakan environment variables:
 ```ini
 ETCD_NAME=etcd2
 ETCD_DATA_DIR=/var/lib/etcd/default.etcd
-ETCD_LISTEN_PEER_URLS=http://10.30.13.12:2380
-ETCD_INITIAL_ADVERTISE_PEER_URLS=http://10.30.13.12:2380
-ETCD_LISTEN_CLIENT_URLS=http://10.30.13.12:2379,http://127.0.0.1:2379
-ETCD_ADVERTISE_CLIENT_URLS=http://10.30.13.12:2379
-ETCD_INITIAL_CLUSTER=etcd1=http://10.30.13.13:2380,etcd2=http://10.30.13.12:2380,etcd3=http://10.30.13.14:2380
+ETCD_LISTEN_PEER_URLS=http://10.30.110.114:2380
+ETCD_INITIAL_ADVERTISE_PEER_URLS=http://10.30.110.114:2380
+ETCD_LISTEN_CLIENT_URLS=http://10.30.110.114:2379,http://127.0.0.1:2379
+ETCD_ADVERTISE_CLIENT_URLS=http://10.30.110.114:2379
+ETCD_INITIAL_CLUSTER=etcd1=http://10.30.110.115:2380,etcd2=http://10.30.110.114:2380,etcd3=http://10.30.110.116:2380
 ETCD_INITIAL_CLUSTER_STATE=new
 ETCD_INITIAL_CLUSTER_TOKEN=pg-etcd-cluster
 ETCD_QUOTA_BACKEND_BYTES=8589934592
@@ -107,8 +107,8 @@ frontend pg_frontend
 backend pg_backend
     option httpchk GET /master
     http-check expect status 200
-    server pg-node-d 10.30.13.10:5432 check port 8008 inter 5s fall 3 rise 2
-    server pg-node-e 10.30.13.11:5432 check port 8008 inter 5s fall 3 rise 2
+    server pg-node-d 10.30.110.128:5432 check port 8008 inter 5s fall 3 rise 2
+    server pg-node-e 10.30.110.113:5432 check port 8008 inter 5s fall 3 rise 2
 ```
 
 Start:
@@ -122,7 +122,7 @@ systemctl enable --now haproxy
 Keepalived 2.4 — `state MASTER` dengan priority 150, track script HAProxy:
 
 ```bash
-cp /root/keepalived-master-10.30.13.12.conf /etc/keepalived/keepalived.conf
+cp /root/keepalived-master-10.30.110.114.conf /etc/keepalived/keepalived.conf
 ```
 
 ```ini
@@ -138,7 +138,7 @@ vrrp_instance VI_PG {
     priority 150
     advert_int 1
     authentication { auth_type PASS; auth_pass pgcluster99 }
-    virtual_ipaddress { 10.30.13.15/24 }
+    virtual_ipaddress { 10.30.110.112/24 }
     track_script { check_haproxy }
 }
 ```
@@ -147,7 +147,7 @@ Start:
 
 ```bash
 systemctl enable --now keepalived
-ip addr show | grep 10.30.13.15
+ip addr show | grep 10.30.110.112
 ```
 
 ## 7. Firewall — etcd v3.6 port
@@ -165,5 +165,5 @@ firewall-cmd --reload
 ```bash
 etcdctl endpoint health --cluster
 systemctl status haproxy keepalived --no-pager
-ip addr show | grep 10.30.13.15
+ip addr show | grep 10.30.110.112
 ```

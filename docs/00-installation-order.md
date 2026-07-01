@@ -31,6 +31,6 @@
 ## Verifikasi Final
 
 ```bash
-psql -h 10.30.13.15 -p 5432 -U postgres -c "SELECT pg_is_in_recovery();"
+psql -h 10.30.110.112 -p 5432 -U postgres -c "SELECT pg_is_in_recovery();"
 # false = terhubung ke Master via VIP
 ```

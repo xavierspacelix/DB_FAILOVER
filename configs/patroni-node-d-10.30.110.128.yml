@@ -1,19 +1,22 @@
-# Patroni 4.1.3 — Node E (10.30.13.11) — Replica
+# Patroni 4.1.3 — Node D (10.30.110.128) — Leader dengan data existing
 # Referensi: https://patroni.readthedocs.io/en/latest/yaml_configuration.html
+#
+# CATATAN: Node ini sudah punya database existing.
+# Patroni akan mendeteksi data di data_dir dan mengadopsinya (bukan buat baru).
 
 scope: pg_cluster
 namespace: /db/
-name: node-e
+name: node-d
 
 restapi:
-    listen: 10.30.13.11:8008
-    connect_address: 10.30.13.11:8008
+    listen: 10.30.110.128:8008
+    connect_address: 10.30.110.128:8008
 
 etcd3:
     hosts:
-        - 10.30.13.12:2379
-        - 10.30.13.13:2379
-        - 10.30.13.14:2379
+        - 10.30.110.114:2379
+        - 10.30.110.115:2379
+        - 10.30.110.116:2379
 
 bootstrap:
     dcs:
@@ -33,24 +36,17 @@ bootstrap:
                 wal_log_hints: "on"
                 shared_buffers: 256MB
 
-    initdb:
-        - encoding: UTF8
-        - data-checksums
-
-    users:
-        groupware:
-            password: 'KBBgroupware@2025!'
-            options:
-                - createrole
+    # initdb TIDAK digunakan — data sudah ada
+    # users TIDAK digunakan — user sudah ada di DB existing
 
     pg_hba:
-        - host replication replicator 10.30.13.0/24 md5
-        - host all groupware 10.30.13.0/24 md5
+        - host replication replicator 10.30.110.0/24 md5
+        - host all groupware 10.30.110.0/24 md5
         - host all postgres 127.0.0.1/32 trust
 
 postgresql:
-    listen: 10.30.13.11:5432
-    connect_address: 10.30.13.11:5432
+    listen: 10.30.110.128:5432
+    connect_address: 10.30.110.128:5432
     data_dir: /var/lib/pgsql/16/data
     bin_dir: /usr/pgsql-16/bin
     pgpass: /tmp/pgpass

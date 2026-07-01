@@ -8,7 +8,7 @@
 ## Topologi
 
 ```
-VIP 10.30.13.15
+VIP 10.30.110.112
   ├── Node A (.12) Keepalived MASTER + HAProxy + etcd2
   ├── Node B (.13) Keepalived BACKUP  + HAProxy + etcd1
   ├── Node C (.14) etcd3
@@ -24,22 +24,22 @@ Verifikasi data tereplikasi dari Leader ke Replica.
 
 ```bash
 # 1. Buat database & data di Leader (Node D)
-psql -h 10.30.13.10 -U postgres -c "CREATE DATABASE testdb;"
-psql -h 10.30.13.10 -U postgres -d testdb -c "
+psql -h 10.30.110.128 -U postgres -c "CREATE DATABASE testdb;"
+psql -h 10.30.110.128 -U postgres -d testdb -c "
   CREATE TABLE users (id serial primary key, name text);
   INSERT INTO users (name) VALUES ('alice'), ('bob');
 "
 
 # 2. Cek apakah sudah tereplikasi ke Replica (Node E)
-psql -h 10.30.13.11 -U postgres -d testdb -c "SELECT * FROM users;"
+psql -h 10.30.110.113 -U postgres -d testdb -c "SELECT * FROM users;"
 # Harus muncul: alice, bob
 
 # 3. Cek via VIP (harus ke Leader)
-psql -h 10.30.13.15 -U postgres -d testdb -c "SELECT * FROM users;"
+psql -h 10.30.110.112 -U postgres -d testdb -c "SELECT * FROM users;"
 # Sama — routing via HAProxy
 
 # 4. Cek slot replikasi
-psql -h 10.30.13.10 -U postgres -c "SELECT * FROM pg_stat_replication;"
+psql -h 10.30.110.128 -U postgres -c "SELECT * FROM pg_stat_replication;"
 ```
 
 | Kolom | Harus |
@@ -62,12 +62,12 @@ patronictl -c /etc/patroni/patroni.yml list
 # + Cluster: pg_cluster ---+----+-----------+
 # | Member  | Host         | Role  | State   |
 # +---------+--------------+-------+---------+
-# | node-d  | 10.30.13.10  | Leader| running |
-# | node-e  | 10.30.13.11  | Replica| running |
+# | node-d  | 10.30.110.128  | Leader| running |
+# | node-e  | 10.30.110.113  | Replica| running |
 # +---------+--------------+-------+---------+
 
 # 2. Matikan Patroni di Node D (Leader)
-ssh root@10.30.13.10 "systemctl stop patroni"
+ssh root@10.30.110.128 "systemctl stop patroni"
 
 # 3. Tunggu 10-30 detik (ttl=30), cek status
 patronictl -c /etc/patroni/patroni.yml list
@@ -76,29 +76,29 @@ patronictl -c /etc/patroni/patroni.yml list
 # + Cluster: pg_cluster ---+----+-----------+
 # | Member  | Host         | Role  | State   |
 # +---------+--------------+-------+---------+
-# | node-d  | 10.30.13.10  |       | stopped |
-# | node-e  | 10.30.13.11  | Leader| running |
+# | node-d  | 10.30.110.128  |       | stopped |
+# | node-e  | 10.30.110.113  | Leader| running |
 # +---------+--------------+-------+---------+
 
 # 4. Verifikasi koneksi via VIP masih jalan (otomatis ke Node E)
-psql -h 10.30.13.15 -U postgres -d testdb -c "SELECT * FROM users;"
+psql -h 10.30.110.112 -U postgres -d testdb -c "SELECT * FROM users;"
 # Harus tetap bisa query — HAProxy routing ke Leader baru
 
 # 5. Cek Node E benar-benar Leader (tidak dalam recovery)
-psql -h 10.30.13.15 -U postgres -c "SELECT pg_is_in_recovery();"
+psql -h 10.30.110.112 -U postgres -c "SELECT pg_is_in_recovery();"
 # false = bukan recovery → Leader
 
 # 6. Cek timeline
-psql -h 10.30.13.15 -U postgres -c "SELECT timeline_id FROM pg_stat_progress_basebackup;"
+psql -h 10.30.110.112 -U postgres -c "SELECT timeline_id FROM pg_stat_progress_basebackup;"
 # atau
-psql -h 10.30.13.15 -U postgres -c "SELECT system_identifier, timeline_id, xlogpos FROM pg_control_checkpoint();"
+psql -h 10.30.110.112 -U postgres -c "SELECT system_identifier, timeline_id, xlogpos FROM pg_control_checkpoint();"
 ```
 
 ### Recovery — Kembalikan Node D sebagai Replica
 
 ```bash
 # 1. Start ulang Patroni di Node D
-ssh root@10.30.13.10 "systemctl start patroni"
+ssh root@10.30.110.128 "systemctl start patroni"
 
 # 2. Tunggu, cek status — Node D otomatis join sebagai Replica
 patronictl -c /etc/patroni/patroni.yml list
@@ -107,8 +107,8 @@ patronictl -c /etc/patroni/patroni.yml list
 # + Cluster: pg_cluster ---+----+-----------+
 # | Member  | Host         | Role  | State   |
 # +---------+--------------+-------+---------+
-# | node-e  | 10.30.13.11  | Leader| running |
-# | node-d  | 10.30.13.10  | Replica| running |
+# | node-e  | 10.30.110.113  | Leader| running |
+# | node-d  | 10.30.110.128  | Replica| running |
 # +---------+--------------+-------+---------+
 ```
 
@@ -130,8 +130,8 @@ patronictl -c /etc/patroni/patroni.yml switchover --master node-e --candidate no
 # + Cluster: pg_cluster ---+----+-----------+
 # | Member  | Host         | Role  | State   |
 # +---------+--------------+-------+---------+
-# | node-e  | 10.30.13.11  | Leader| running |
-# | node-d  | 10.30.13.10  | Replica| running |
+# | node-e  | 10.30.110.113  | Leader| running |
+# | node-d  | 10.30.110.128  | Replica| running |
 # +---------+--------------+-------+---------+
 # Are you sure you want to switchover? [y/N]: y
 
@@ -142,16 +142,16 @@ patronictl -c /etc/patroni/patroni.yml list
 # + Cluster: pg_cluster ---+----+-----------+
 # | Member  | Host         | Role  | State   |
 # +---------+--------------+-------+---------+
-# | node-d  | 10.30.13.10  | Leader| running |
-# | node-e  | 10.30.13.11  | Replica| running |
+# | node-d  | 10.30.110.128  | Leader| running |
+# | node-e  | 10.30.110.113  | Replica| running |
 # +---------+--------------+-------+---------+
 
 # 4. Verifikasi tidak ada downtime
-psql -h 10.30.13.15 -U postgres -d testdb -c "SELECT count(*) FROM users;"
+psql -h 10.30.110.112 -U postgres -d testdb -c "SELECT count(*) FROM users;"
 # count = 2 (data tetap utuh)
 
 # 5. Cek timeline bertambah
-psql -h 10.30.13.15 -U postgres -c "SELECT timeline_id FROM pg_control_checkpoint();"
+psql -h 10.30.110.112 -U postgres -c "SELECT timeline_id FROM pg_control_checkpoint();"
 # Timeline naik 1 setiap switchover/failover
 ```
 
@@ -161,26 +161,26 @@ psql -h 10.30.13.15 -U postgres -c "SELECT timeline_id FROM pg_control_checkpoin
 
 ```bash
 # 1. Cek status backend via HAProxy stats
-# Buka di browser: http://10.30.13.12:8080/stats
+# Buka di browser: http://10.30.110.114:8080/stats
 # atau
-curl -u admin:admin123 http://10.30.13.12:8080/stats 2>/dev/null | grep -E "pg_node|status"
+curl -u admin:admin123 http://10.30.110.114:8080/stats 2>/dev/null | grep -E "pg_node|status"
 
 # 2. Test health check endpoint Patroni langsung
-curl -s http://10.30.13.10:8008/master | python3 -m json.tool
+curl -s http://10.30.110.128:8008/master | python3 -m json.tool
 # Harus return {"state": "running", ...}
 
-curl -s http://10.30.13.11:8008/master | python3 -m json.tool
+curl -s http://10.30.110.113:8008/master | python3 -m json.tool
 # Harus return 503 (bukan master)
 
-curl -s http://10.30.13.11:8008/replica | python3 -m json.tool
+curl -s http://10.30.110.113:8008/replica | python3 -m json.tool
 # Harus return {"state": "running", ...}
 
 # 3. Test HAProxy routing — matikan Leader
-ssh root@10.30.13.10 "systemctl stop patroni"
+ssh root@10.30.110.128 "systemctl stop patroni"
 sleep 15
 
 # Cek health — HAProxy harus sudah pindah ke Node E
-curl -s http://10.30.13.11:8008/master | python3 -m json.tool
+curl -s http://10.30.110.113:8008/master | python3 -m json.tool
 # return 200 (karena sekarang Leader)
 ```
 
@@ -193,9 +193,9 @@ curl -s http://10.30.13.11:8008/master | python3 -m json.tool
 etcdctl member list
 
 # Output:
-# etcd1[unstarted]: name=etcd1 peerURLs=http://10.30.13.13:2380 clientURLs=http://10.30.13.13:2379 isLeader=false
-# etcd2[unstarted]: name=etcd2 peerURLs=http://10.30.13.12:2380 clientURLs=http://10.30.13.12:2379 isLeader=false
-# etcd3[unstarted]: name=etcd3 peerURLs=http://10.30.13.14:2380 clientURLs=http://10.30.13.14:2379 isLeader=true
+# etcd1[unstarted]: name=etcd1 peerURLs=http://10.30.110.115:2380 clientURLs=http://10.30.110.115:2379 isLeader=false
+# etcd2[unstarted]: name=etcd2 peerURLs=http://10.30.110.114:2380 clientURLs=http://10.30.110.114:2379 isLeader=false
+# etcd3[unstarted]: name=etcd3 peerURLs=http://10.30.110.116:2380 clientURLs=http://10.30.110.116:2379 isLeader=true
 
 # 2. Health semua endpoint
 etcdctl endpoint health --cluster -w table
@@ -204,21 +204,21 @@ etcdctl endpoint health --cluster -w table
 # +-------------------+-----------+-------------+-------+
 # |    ENDPOINT       |  HEALTH   |  TOOK       | ERROR |
 # +-------------------+-----------+-------------+-------+
-# | 10.30.13.12:2379  |   true    | 2.345678ms  |       |
-# | 10.30.13.13:2379  |   true    | 3.123456ms  |       |
-# | 10.30.13.14:2379  |   true    | 1.987654ms  |       |
+# | 10.30.110.114:2379  |   true    | 2.345678ms  |       |
+# | 10.30.110.115:2379  |   true    | 3.123456ms  |       |
+# | 10.30.110.116:2379  |   true    | 1.987654ms  |       |
 # +-------------------+-----------+-------------+-------+
 
 # 3. Status endpoint
 etcdctl endpoint status --cluster -w table
 
 # 4. Test tolerance — matikan 1 node etcd
-ssh root@10.30.13.14 "systemctl stop etcd"
+ssh root@10.30.110.116 "systemctl stop etcd"
 etcdctl endpoint health --cluster
 # 2/3 sehat — quorum masih aman
 
 # 5. Matikan 2 node (simulasi quorum lost)
-ssh root@10.30.13.13 "systemctl stop etcd"
+ssh root@10.30.110.115 "systemctl stop etcd"
 etcdctl endpoint health --cluster
 # Gagal — quorum hilang, cluster read-only
 ```
@@ -227,8 +227,8 @@ etcdctl endpoint health --cluster
 
 ```bash
 # 1. Start node yang mati
-ssh root@10.30.13.13 "systemctl start etcd"
-ssh root@10.30.13.14 "systemctl start etcd"
+ssh root@10.30.110.115 "systemctl start etcd"
+ssh root@10.30.110.116 "systemctl start etcd"
 
 # 2. Verifikasi
 etcdctl endpoint health --cluster -w table
@@ -244,27 +244,27 @@ patronictl -c /etc/patroni/patroni.yml list
 
 ```bash
 # 1. Cek VIP ada di mana
-ip addr show | grep 10.30.13.15
+ip addr show | grep 10.30.110.112
 
 # Harus aktif di Node A (MASTER)
 
 # 2. Matikan keepalived di Node A
-ssh root@10.30.13.12 "systemctl stop keepalived"
+ssh root@10.30.110.114 "systemctl stop keepalived"
 sleep 3
 
 # 3. Cek VIP pindah ke Node B
-ssh root@10.30.13.13 "ip addr show | grep 10.30.13.15"
+ssh root@10.30.110.115 "ip addr show | grep 10.30.110.112"
 # VIP harus aktif di Node B
 
 # 4. Verifikasi koneksi via VIP masih jalan
-psql -h 10.30.13.15 -U postgres -c "SELECT 1 AS vip_test;"
+psql -h 10.30.110.112 -U postgres -c "SELECT 1 AS vip_test;"
 
 # 5. Kembalikan Node A
-ssh root@10.30.13.12 "systemctl start keepalived"
+ssh root@10.30.110.114 "systemctl start keepalived"
 sleep 3
 
 # 6. VIP kembali ke Node A (priority lebih tinggi)
-ip addr show | grep 10.30.13.15
+ip addr show | grep 10.30.110.112
 # VIP di Node A lagi
 ```
 
@@ -277,40 +277,40 @@ Skenario paling ekstrem: matikan semua node lalu hidupkan satu per satu.
 ```bash
 # 1. Matikan semua service di semua node
 # Node D (Leader)
-ssh root@10.30.13.10 "systemctl stop patroni"
+ssh root@10.30.110.128 "systemctl stop patroni"
 # Node E (Replica)
-ssh root@10.30.13.11 "systemctl stop patroni"
+ssh root@10.30.110.113 "systemctl stop patroni"
 # Node A (MASTER + etcd)
-ssh root@10.30.13.12 "systemctl stop keepalived haproxy etcd"
+ssh root@10.30.110.114 "systemctl stop keepalived haproxy etcd"
 # Node B (BACKUP + etcd)
-ssh root@10.30.13.13 "systemctl stop keepalived haproxy etcd"
+ssh root@10.30.110.115 "systemctl stop keepalived haproxy etcd"
 # Node C (etcd)
-ssh root@10.30.13.14 "systemctl stop etcd"
+ssh root@10.30.110.116 "systemctl stop etcd"
 
 # 2. Start etcd dulu (A, B, C)
-ssh root@10.30.13.12 "systemctl start etcd"
-ssh root@10.30.13.13 "systemctl start etcd"
-ssh root@10.30.13.14 "systemctl start etcd"
+ssh root@10.30.110.114 "systemctl start etcd"
+ssh root@10.30.110.115 "systemctl start etcd"
+ssh root@10.30.110.116 "systemctl start etcd"
 sleep 5
 etcdctl endpoint health --cluster
 
 # 3. Start Patroni Leader (Node D)
-ssh root@10.30.13.10 "systemctl start patroni"
+ssh root@10.30.110.128 "systemctl start patroni"
 sleep 15
 patronictl list
 
 # 4. Start Patroni Replica (Node E)
-ssh root@10.30.13.11 "systemctl start patroni"
+ssh root@10.30.110.113 "systemctl start patroni"
 sleep 15
 
 # 5. Start HAProxy + Keepalived (Node A, B)
-ssh root@10.30.13.12 "systemctl start haproxy keepalived"
-ssh root@10.30.13.13 "systemctl start haproxy keepalived"
+ssh root@10.30.110.114 "systemctl start haproxy keepalived"
+ssh root@10.30.110.115 "systemctl start haproxy keepalived"
 
 # 6. Verifikasi final
 patronictl -c /etc/patroni/patroni.yml list
-psql -h 10.30.13.15 -U postgres -c "SELECT pg_is_in_recovery();"
-psql -h 10.30.13.15 -U postgres -d testdb -c "SELECT count(*) FROM users;"
+psql -h 10.30.110.112 -U postgres -c "SELECT pg_is_in_recovery();"
+psql -h 10.30.110.112 -U postgres -d testdb -c "SELECT count(*) FROM users;"
 ```
 
 ---
@@ -319,8 +319,8 @@ psql -h 10.30.13.15 -U postgres -d testdb -c "SELECT count(*) FROM users;"
 
 ```bash
 # Endpoint per node
-NODE_D="http://10.30.13.10:8008"
-NODE_E="http://10.30.13.11:8008"
+NODE_D="http://10.30.110.128:8008"
+NODE_E="http://10.30.110.113:8008"
 
 # Cluster overview
 curl -s $NODE_D/cluster | python3 -m json.tool

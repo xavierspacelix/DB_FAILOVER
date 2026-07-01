@@ -1,4 +1,4 @@
-# Instalasi Node C — 10.30.13.14
+# Instalasi Node C — 10.30.110.116
 
 **Layanan:** etcd (Node 3)  
 **Dokumentasi 2026:** [etcd v3.6 config](https://etcd.io/docs/v3.6/op-guide/configuration/)
@@ -10,7 +10,7 @@
 - Rocky Linux 9.7
 - Akses root
 - File `/root/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
-- File config: `etcd-node-c-10.30.13.14.conf`
+- File config: `etcd-node-c-10.30.110.116.conf`
 
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
@@ -38,17 +38,17 @@ dnf install --disablerepo='*' --enablerepo=local-offline -y \
 ## 4. Konfigurasi etcd
 
 ```bash
-cp /root/etcd-node-c-10.30.13.14.conf /etc/etcd/etcd.conf
+cp /root/etcd-node-c-10.30.110.116.conf /etc/etcd/etcd.conf
 ```
 
 ```ini
 ETCD_NAME=etcd3
 ETCD_DATA_DIR=/var/lib/etcd/default.etcd
-ETCD_LISTEN_PEER_URLS=http://10.30.13.14:2380
-ETCD_INITIAL_ADVERTISE_PEER_URLS=http://10.30.13.14:2380
-ETCD_LISTEN_CLIENT_URLS=http://10.30.13.14:2379,http://127.0.0.1:2379
-ETCD_ADVERTISE_CLIENT_URLS=http://10.30.13.14:2379
-ETCD_INITIAL_CLUSTER=etcd1=http://10.30.13.13:2380,etcd2=http://10.30.13.12:2380,etcd3=http://10.30.13.14:2380
+ETCD_LISTEN_PEER_URLS=http://10.30.110.116:2380
+ETCD_INITIAL_ADVERTISE_PEER_URLS=http://10.30.110.116:2380
+ETCD_LISTEN_CLIENT_URLS=http://10.30.110.116:2379,http://127.0.0.1:2379
+ETCD_ADVERTISE_CLIENT_URLS=http://10.30.110.116:2379
+ETCD_INITIAL_CLUSTER=etcd1=http://10.30.110.115:2380,etcd2=http://10.30.110.114:2380,etcd3=http://10.30.110.116:2380
 ETCD_INITIAL_CLUSTER_STATE=new
 ETCD_INITIAL_CLUSTER_TOKEN=pg-etcd-cluster
 ETCD_QUOTA_BACKEND_BYTES=8589934592

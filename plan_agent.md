@@ -7,19 +7,19 @@
 
 ```mermaid
 flowchart TD
-    VIP["VIP<br/>10.30.13.15"]
+    VIP["VIP<br/>10.30.110.112"]
 
-    subgraph Node12["etcd+HAProxy (10.30.13.12)"]
+    subgraph Node12["etcd+HAProxy (10.30.110.114)"]
         KA1[Keepalived] --> HA1[HAProxy]
         ETCD2["etcd (Node 2)"]
     end
 
-    subgraph Node13["etcd+HAProxy (10.30.13.13)"]
+    subgraph Node13["etcd+HAProxy (10.30.110.115)"]
         KA2[Keepalived] --> HA2[HAProxy]
         ETCD1["etcd (Node 1)"]
     end
 
-    subgraph Node14["etcd (10.30.13.14)"]
+    subgraph Node14["etcd (10.30.110.116)"]
         ETCD3["etcd (Node 3)"]
     end
 
@@ -32,11 +32,11 @@ flowchart TD
     HA2 -.-> PAT_M[PATRONI]
     HA2 -.-> PAT_S[PATRONI]
 
-    subgraph MasterNode["10.30.13.10:5432"]
+    subgraph MasterNode["10.30.110.128:5432"]
         PAT_M -- Manage --> PG_M["PostgreSQL / Master"]
     end
 
-    subgraph SlaveNode["10.30.13.11:5432"]
+    subgraph SlaveNode["10.30.110.113:5432"]
         PAT_S -- Manage --> PG_S["PostgreSQL / Slave"]
     end
 
@@ -50,12 +50,12 @@ flowchart TD
 
 | Role | IP | Services |
 |---|---|---|
-| VIP | `10.30.13.15` | - (dikelola Keepalived) |
-| Node A | `10.30.13.12` | Keepalived, HAProxy, etcd (Node 2) |
-| Node B | `10.30.13.13` | Keepalived, HAProxy, etcd (Node 1) |
-| Node C | `10.30.13.14` | etcd (Node 3) |
-| Node D | `10.30.13.10` | Patroni + PostgreSQL (Master) |
-| Node E | `10.30.13.11` | Patroni + PostgreSQL (Slave) |
+| VIP | `10.30.110.112` | - (dikelola Keepalived) |
+| Node A | `10.30.110.114` | Keepalived, HAProxy, etcd (Node 2) |
+| Node B | `10.30.110.115` | Keepalived, HAProxy, etcd (Node 1) |
+| Node C | `10.30.110.116` | etcd (Node 3) |
+| Node D | `10.30.110.128` | Patroni + PostgreSQL (Master) |
+| Node E | `10.30.110.113` | Patroni + PostgreSQL (Slave) |
 
 ---
 
@@ -157,7 +157,7 @@ dnf clean all
 ```bash
 dnf install -y etcd
 ```
-Edit `/etc/etcd/etcd.conf` di tiap node — set `ETCD_NAME` unik, `ETCD_INITIAL_CLUSTER` berisi ketiga member (`name1=http://10.30.13.12:2380,name2=http://10.30.13.13:2380,name3=http://10.30.13.14:2380`), `ETCD_INITIAL_CLUSTER_STATE=new`, `ETCD_LISTEN_PEER_URLS`/`ETCD_LISTEN_CLIENT_URLS` sesuai IP node.
+Edit `/etc/etcd/etcd.conf` di tiap node — set `ETCD_NAME` unik, `ETCD_INITIAL_CLUSTER` berisi ketiga member (`name1=http://10.30.110.114:2380,name2=http://10.30.110.115:2380,name3=http://10.30.110.116:2380`), `ETCD_INITIAL_CLUSTER_STATE=new`, `ETCD_LISTEN_PEER_URLS`/`ETCD_LISTEN_CLIENT_URLS` sesuai IP node.
 
 ```bash
 systemctl enable --now etcd
@@ -170,7 +170,7 @@ etcdctl endpoint health --cluster
 ```bash
 dnf install -y postgresql16-server postgresql16-contrib patroni
 ```
-Buat `/etc/patroni.yml` di kedua node — `scope` sama, `etcd3.hosts` mengarah ke ketiga etcd node (`10.30.13.12:2379,10.30.13.13:2379,10.30.13.14:2379`).
+Buat `/etc/patroni.yml` di kedua node — `scope` sama, `etcd3.hosts` mengarah ke ketiga etcd node (`10.30.110.114:2379,10.30.110.115:2379,10.30.110.116:2379`).
 
 ```bash
 # Node D dulu (jadi Leader/Master)
@@ -186,7 +186,7 @@ patronictl -c /etc/patroni.yml list
 ```bash
 dnf install -y haproxy
 ```
-Edit `/etc/haproxy/haproxy.cfg` — backend health-check ke Patroni REST API (`10.30.13.10:8008/master`, `10.30.13.11:8008/master`), frontend listen port `5432`.
+Edit `/etc/haproxy/haproxy.cfg` — backend health-check ke Patroni REST API (`10.30.110.128:8008/master`, `10.30.110.113:8008/master`), frontend listen port `5432`.
 
 ```bash
 systemctl enable --now haproxy
@@ -200,18 +200,18 @@ dnf install -y keepalived
 Edit `/etc/keepalived/keepalived.conf`:
 - Node A: `state MASTER`, priority tinggi
 - Node B: `state BACKUP`, priority rendah
-- `virtual_ipaddress { 10.30.13.15 }` di kedua node
+- `virtual_ipaddress { 10.30.110.112 }` di kedua node
 - `track_script` cek proses `haproxy` lokal
 
 ```bash
 systemctl enable --now keepalived
-ip addr show | grep 10.30.13.15
+ip addr show | grep 10.30.110.112
 ```
 
 ### 2.6 Verifikasi end-to-end
 
 ```bash
-psql -h 10.30.13.15 -p 5432 -U postgres -c "SELECT pg_is_in_recovery();"
+psql -h 10.30.110.112 -p 5432 -U postgres -c "SELECT pg_is_in_recovery();"
 # false = terhubung ke Master via VIP → benar
 ```
 

@@ -26,7 +26,7 @@ Jalankan **berurutan** sesuai tabel. Jangan pernah bersamaan — urutan salah bi
 
 ## Langkah-langkah
 
-### 1. Node E (10.30.13.11) — Hapus Replica
+### 1. Node E (10.30.110.113) — Hapus Replica
 
 ```bash
 systemctl stop patroni
@@ -41,7 +41,7 @@ rm -f /var/lib/pgsql/patroni*
 systemctl disable patroni
 ```
 
-### 2. Node D (10.30.13.10) — Hapus Leader
+### 2. Node D (10.30.110.128) — Hapus Leader
 
 ```bash
 systemctl stop patroni
@@ -58,7 +58,7 @@ rm -f /var/lib/pgsql/patroni*
 systemctl disable patroni
 ```
 
-### 3. Node A, B, C (10.30.13.12–14) — Hapus etcd Cluster
+### 3. Node A, B, C (10.30.110.114–14) — Hapus etcd Cluster
 
 Jalankan di **ketiga node**:
 
@@ -76,7 +76,7 @@ systemctl disable etcd
 
 > **Penting:** Semua node etcd harus stop sebelum lanjut. Jika hanya sebagian, cluster tetap anggap quorum ada dan data bisa corrupt.
 
-### 4. Node A & B (10.30.13.12, .13) — Hapus Load Balancer
+### 4. Node A & B (10.30.110.114, .13) — Hapus Load Balancer
 
 ```bash
 systemctl stop haproxy keepalived
@@ -139,7 +139,7 @@ patronictl -c /etc/patroni/patroni.yml list
 systemctl enable --now haproxy keepalived
 
 # Verifikasi
-ip addr show | grep 10.30.13.15
+ip addr show | grep 10.30.110.112
 # VIP harus aktif di Node A (MASTER)
 ```
 
@@ -149,10 +149,10 @@ ip addr show | grep 10.30.13.15
 
 ```bash
 # Dari node mana pun
-psql -h 10.30.13.15 -p 5432 -U postgres -c "SELECT pg_is_in_recovery();"
+psql -h 10.30.110.112 -p 5432 -U postgres -c "SELECT pg_is_in_recovery();"
 # false = terhubung ke Master
 
-psql -h 10.30.13.15 -p 5432 -U postgres -c "\l"
+psql -h 10.30.110.112 -p 5432 -U postgres -c "\l"
 # Harus muncul daftar database default
 ```
 

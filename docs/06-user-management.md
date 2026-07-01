@@ -7,7 +7,7 @@ Gunakan `groupware` — jangan pakai `postgres`.
 **DB_URL:**
 
 ```
-postgresql://groupware:KBBgroupware@2025!@10.30.13.15:5432/nama_database
+postgresql://groupware:KBBgroupware@2025!@10.30.110.112:5432/nama_database
 ```
 
 ## Cara Buat Database untuk Aplikasi
