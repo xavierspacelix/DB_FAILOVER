@@ -13,7 +13,7 @@
 
 - Rocky Linux 9.7
 - Akses root
-- File `/root/pgha-offline-bundle.tar.gz` sudah di-copy
+- File `/home/kbbadmin/pgha-offline-bundle.tar.gz` sudah di-copy
 - File config: `patroni-node-d-10.30.110.128.yml`
 - etcd cluster 3 node sudah running (Node A, B, C)
 
@@ -80,12 +80,12 @@ psql -U postgres -c "CREATE USER groupware WITH PASSWORD 'KBBgroupware@2025!' CR
 ## 4. Ekstrak Bundle & Setup Repo Lokal
 
 ```bash
-tar xzf /root/pgha-offline-bundle.tar.gz -C /root/
+tar xzf /home/kbbadmin/pgha-offline-bundle.tar.gz -C /home/kbbadmin/
 
 cat <<EOF > /etc/yum.repos.d/local-offline.repo
 [local-offline]
 name=Local Offline Repo
-baseurl=file:///root/offline-rpms
+baseurl=file:///home/kbbadmin/offline-rpms
 enabled=1
 gpgcheck=0
 EOF
@@ -107,7 +107,7 @@ dnf install --disablerepo='*' --enablerepo=local-offline -y \
 
 ```bash
 mkdir -p /etc/patroni
-cp /root/patroni-node-d-10.30.110.128.yml /etc/patroni/patroni.yml
+cp /home/kbbadmin/patroni-node-d-10.30.110.128.yml /etc/patroni/patroni.yml
 ```
 
 Tidak perlu buat `data_dir` — sudah ada.  

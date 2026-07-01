@@ -9,18 +9,18 @@
 
 - Rocky Linux 9.7
 - Akses root
-- File `/root/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
+- File `/home/kbbadmin/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
 - File config: `etcd-node-b-10.30.110.115.conf`, `haproxy.cfg`, `keepalived-backup-10.30.110.115.conf`
 
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
 ```bash
-tar xzf /root/pgha-offline-bundle.tar.gz -C /root/
+tar xzf /home/kbbadmin/pgha-offline-bundle.tar.gz -C /home/kbbadmin/
 
 cat <<EOF > /etc/yum.repos.d/local-offline.repo
 [local-offline]
 name=Local Offline Repo
-baseurl=file:///root/offline-rpms
+baseurl=file:///home/kbbadmin/offline-rpms
 enabled=1
 gpgcheck=0
 EOF
@@ -38,7 +38,7 @@ dnf install --disablerepo='*' --enablerepo=local-offline -y \
 ## 4. Konfigurasi etcd
 
 ```bash
-cp /root/etcd-node-b-10.30.110.115.conf /etc/etcd/etcd.conf
+cp /home/kbbadmin/etcd-node-b-10.30.110.115.conf /etc/etcd/etcd.conf
 ```
 
 ```ini
@@ -69,7 +69,7 @@ etcdctl endpoint health --cluster
 ## 5. Konfigurasi HAProxy
 
 ```bash
-cp /root/haproxy.cfg /etc/haproxy/haproxy.cfg
+cp /home/kbbadmin/haproxy.cfg /etc/haproxy/haproxy.cfg
 ```
 
 ```haproxy
@@ -108,7 +108,7 @@ systemctl enable --now haproxy
 ## 6. Konfigurasi Keepalived (BACKUP)
 
 ```bash
-cp /root/keepalived-backup-10.30.110.115.conf /etc/keepalived/keepalived.conf
+cp /home/kbbadmin/keepalived-backup-10.30.110.115.conf /etc/keepalived/keepalived.conf
 ```
 
 Keepalived 2.4 — `state BACKUP` priority 100, hanya menjadi aktif jika MASTER down:

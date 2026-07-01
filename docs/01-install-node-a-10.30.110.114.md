@@ -9,18 +9,18 @@
 
 - Rocky Linux 9.7
 - Akses root
-- File `/root/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
+- File `/home/kbbadmin/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
 - File config: `etcd-node-a-10.30.110.114.conf`, `haproxy.cfg`, `keepalived-master-10.30.110.114.conf`
 
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
 ```bash
-tar xzf /root/pgha-offline-bundle.tar.gz -C /root/
+tar xzf /home/kbbadmin/pgha-offline-bundle.tar.gz -C /home/kbbadmin/
 
 cat <<EOF > /etc/yum.repos.d/local-offline.repo
 [local-offline]
 name=Local Offline Repo
-baseurl=file:///root/offline-rpms
+baseurl=file:///home/kbbadmin/offline-rpms
 enabled=1
 gpgcheck=0
 EOF
@@ -40,7 +40,7 @@ dnf install --disablerepo='*' --enablerepo=local-offline -y \
 Copy config:
 
 ```bash
-cp /root/etcd-node-a-10.30.110.114.conf /etc/etcd/etcd.conf
+cp /home/kbbadmin/etcd-node-a-10.30.110.114.conf /etc/etcd/etcd.conf
 ```
 
 Isi konfigurasi — etcd 3.6 menggunakan environment variables:
@@ -77,7 +77,7 @@ etcdctl endpoint health --cluster
 HAProxy 3.4 health check via Patroni REST API (`/master` endpoint):
 
 ```bash
-cp /root/haproxy.cfg /etc/haproxy/haproxy.cfg
+cp /home/kbbadmin/haproxy.cfg /etc/haproxy/haproxy.cfg
 ```
 
 Konfigurasi:
@@ -122,7 +122,7 @@ systemctl enable --now haproxy
 Keepalived 2.4 — `state MASTER` dengan priority 150, track script HAProxy:
 
 ```bash
-cp /root/keepalived-master-10.30.110.114.conf /etc/keepalived/keepalived.conf
+cp /home/kbbadmin/keepalived-master-10.30.110.114.conf /etc/keepalived/keepalived.conf
 ```
 
 ```ini

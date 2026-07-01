@@ -9,18 +9,18 @@
 
 - Rocky Linux 9.7
 - Akses root
-- File `/root/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
+- File `/home/kbbadmin/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
 - File config: `etcd-node-c-10.30.110.116.conf`
 
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
 ```bash
-tar xzf /root/pgha-offline-bundle.tar.gz -C /root/
+tar xzf /home/kbbadmin/pgha-offline-bundle.tar.gz -C /home/kbbadmin/
 
 cat <<EOF > /etc/yum.repos.d/local-offline.repo
 [local-offline]
 name=Local Offline Repo
-baseurl=file:///root/offline-rpms
+baseurl=file:///home/kbbadmin/offline-rpms
 enabled=1
 gpgcheck=0
 EOF
@@ -38,7 +38,7 @@ dnf install --disablerepo='*' --enablerepo=local-offline -y \
 ## 4. Konfigurasi etcd
 
 ```bash
-cp /root/etcd-node-c-10.30.110.116.conf /etc/etcd/etcd.conf
+cp /home/kbbadmin/etcd-node-c-10.30.110.116.conf /etc/etcd/etcd.conf
 ```
 
 ```ini

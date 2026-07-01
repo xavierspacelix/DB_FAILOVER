@@ -9,7 +9,7 @@
 
 - Rocky Linux 9.7
 - Akses root
-- File `/root/pgha-offline-bundle.tar.gz` sudah di-copy
+- File `/home/kbbadmin/pgha-offline-bundle.tar.gz` sudah di-copy
 - File config: `patroni-node-e-10.30.110.113.yml`
 - etcd cluster 3 node sudah running
 - Node D (Leader) sudah running
@@ -17,12 +17,12 @@
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
 ```bash
-tar xzf /root/pgha-offline-bundle.tar.gz -C /root/
+tar xzf /home/kbbadmin/pgha-offline-bundle.tar.gz -C /home/kbbadmin/
 
 cat <<EOF > /etc/yum.repos.d/local-offline.repo
 [local-offline]
 name=Local Offline Repo
-baseurl=file:///root/offline-rpms
+baseurl=file:///home/kbbadmin/offline-rpms
 enabled=1
 gpgcheck=0
 EOF
@@ -43,7 +43,7 @@ dnf install --disablerepo='*' --enablerepo=local-offline -y \
 ```bash
 mkdir -p /etc/patroni /var/lib/pgsql/16/data
 chown postgres:postgres /var/lib/pgsql/16/data
-cp /root/patroni-node-e-10.30.110.113.yml /etc/patroni/patroni.yml
+cp /home/kbbadmin/patroni-node-e-10.30.110.113.yml /etc/patroni/patroni.yml
 ```
 
 Bedanya dengan Node D hanya di `name: node-e` dan IP bind:
