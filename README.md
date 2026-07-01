@@ -84,8 +84,8 @@ Deploy **PostgreSQL 16.14** HA Cluster dengan **Patroni 4.1.3** + **etcd 3.6** +
 | PostgreSQL | 16.14 |
 | Patroni | 4.1.3 |
 | etcd | 3.6.11 |
-| HAProxy | 3.4.1 |
-| Keepalived | 2.4.1 |
+| HAProxy | 2.8.14 |
+| Keepalived | 2.2.8 |
 
 ## DB_URL
 

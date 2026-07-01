@@ -1,7 +1,7 @@
 # Instalasi Node B — 10.30.110.115
 
 **Layanan:** etcd (Node 1) + HAProxy + Keepalived (BACKUP)  
-**Dokumentasi 2026:** [etcd v3.6 config](https://etcd.io/docs/v3.6/op-guide/configuration/) • [HAProxy 3.4](http://docs.haproxy.org/3.4/configuration.html) • [Keepalived 2.4](https://www.keepalived.org/documentation/keepalived-conf/)
+**Dokumentasi 2026:** [etcd v3.6 config](https://etcd.io/docs/v3.6/op-guide/configuration/) • [HAProxy 2.8](http://docs.haproxy.org/2.8/configuration.html) • [Keepalived 2.2](https://www.keepalived.org/documentation/keepalived-conf/)
 
 ---
 
@@ -111,7 +111,7 @@ systemctl enable --now haproxy
 cp /home/kbbadmin/keepalived-backup-10.30.110.115.conf /etc/keepalived/keepalived.conf
 ```
 
-Keepalived 2.4 — `state BACKUP` priority 100, hanya menjadi aktif jika MASTER down:
+Keepalived 2.2 — `state BACKUP` priority 100, hanya menjadi aktif jika MASTER down:
 
 ```ini
 global_defs { router_id PGHA_B }

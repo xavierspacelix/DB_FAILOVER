@@ -1,7 +1,7 @@
 # Urutan Instalasi Cluster PG-HA
 
 > Baca ini dulu sebelum menjalankan instruksi per node.
-> Dokumentasi 2026: [etcd v3.6](https://etcd.io/docs/v3.6/) • [Patroni 4.1](https://patroni.readthedocs.io/en/latest/) • [HAProxy 3.4](http://docs.haproxy.org/3.4/) • [Keepalived 2.4](https://www.keepalived.org/documentation/)
+> Dokumentasi 2026: [etcd v3.6](https://etcd.io/docs/v3.6/) • [Patroni 4.1](https://patroni.readthedocs.io/en/latest/) • [HAProxy 2.8](http://docs.haproxy.org/2.8/) • [Keepalived 2.2](https://www.keepalived.org/documentation/)
 
 ---
 

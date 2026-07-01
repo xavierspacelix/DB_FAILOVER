@@ -1,7 +1,7 @@
 # Instalasi Node A — 10.30.110.114
 
 **Layanan:** etcd (Node 2) + HAProxy + Keepalived (MASTER)  
-**Dokumentasi 2026:** [etcd v3.6 config](https://etcd.io/docs/v3.6/op-guide/configuration/) • [HAProxy 3.4](http://docs.haproxy.org/3.4/configuration.html) • [Keepalived 2.4](https://www.keepalived.org/documentation/keepalived-conf/)
+**Dokumentasi 2026:** [etcd v3.6 config](https://etcd.io/docs/v3.6/op-guide/configuration/) • [HAProxy 2.8](http://docs.haproxy.org/2.8/configuration.html) • [Keepalived 2.2](https://www.keepalived.org/documentation/keepalived-conf/)
 
 ---
 
@@ -74,7 +74,7 @@ etcdctl endpoint health --cluster
 
 ## 5. Konfigurasi HAProxy
 
-HAProxy 3.4 health check via Patroni REST API (`/master` endpoint):
+HAProxy 2.8 health check via Patroni REST API (`/master` endpoint):
 
 ```bash
 cp /home/kbbadmin/haproxy.cfg /etc/haproxy/haproxy.cfg
@@ -119,7 +119,7 @@ systemctl enable --now haproxy
 
 ## 6. Konfigurasi Keepalived (MASTER)
 
-Keepalived 2.4 — `state MASTER` dengan priority 150, track script HAProxy:
+Keepalived 2.2 — `state MASTER` dengan priority 150, track script HAProxy:
 
 ```bash
 cp /home/kbbadmin/keepalived-master-10.30.110.114.conf /etc/keepalived/keepalived.conf
