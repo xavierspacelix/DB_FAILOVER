@@ -50,16 +50,28 @@
 | 4.7 | Start Keepalived on Node A & B | Juan Akbar | | 14-Jul | 14-Jul | | | Keepalived running | 4.5–4.6 |
 | 4.8 | Verify VIP 10.30.110.112 active on MASTER | Juan Akbar | | 14-Jul | 14-Jul | | | VIP confirmed active | 4.7 |
 | **M4** | **Milestone: HAProxy + Keepalived + VIP operational** | | | **14-Jul** | **14-Jul** | | | **Network HA OK** | |
-| | **Phase 5 — Testing** | | | **14-Jul** | **15-Jul** | | | | |
-| 5.1 | Test connection via VIP (psql -h 10.30.110.112) | Juan Akbar | | 14-Jul | 14-Jul | | | Connection test passed | 4.8 |
-| 5.2 | Test data replication (create table, verify on Replica) | Juan Akbar | | 14-Jul | 14-Jul | | | Replication verified | 5.1 |
-| 5.3 | Test failover (kill Node D, Node E becomes Leader) | Juan Akbar | | 14-Jul | 14-Jul | | | Failover successful | 5.2 |
-| 5.4 | Test switchover (manual Leader transfer) | Juan Akbar | | 14-Jul | 14-Jul | | | Switchover successful | 5.3 |
-| 5.5 | Test HAProxy health check (routing to /master) | Juan Akbar | | 15-Jul | 15-Jul | | | Health check passed | 5.4 |
-| 5.6 | Test etcd quorum tolerance (1 node down) | Juan Akbar | | 15-Jul | 15-Jul | | | Quorum tolerance OK | 5.5 |
-| 5.7 | Test VIP movement (kill MASTER) | Juan Akbar | | 15-Jul | 15-Jul | | | VIP movement passed | 5.5 |
-| 5.8 | Test total recovery (all nodes down → up) | Juan Akbar | | 15-Jul | 15-Jul | | | Total recovery passed | 5.6–5.7 |
-| **M5** | **Milestone: All testing scenarios passed** | | | **15-Jul** | **15-Jul** | | | **Testing OK** | |
+| | **Phase 5 — Testing (QA Test Cases)** | | | **14-Jul** | **15-Jul** | | | | |
+| 5.1 | TC-01: Connection via VIP (Positive) | Juan Akbar | | 14-Jul | 14-Jul | | | Connection test passed | 4.8 |
+| 5.2 | TC-02: Connection via VIP — wrong user (Negative) | Juan Akbar | | 14-Jul | 14-Jul | | | Connection rejected as expected | 5.1 |
+| 5.3 | TC-03: Direct connection to Leader (Positive) | Juan Akbar | | 14-Jul | 14-Jul | | | `pg_is_in_recovery()` = f | 5.2 |
+| 5.4 | TC-04: Direct connection to Replica (Positive) | Juan Akbar | | 14-Jul | 14-Jul | | | `pg_is_in_recovery()` = t | 5.3 |
+| 5.5 | TC-05: Data replication INSERT (Positive) | Juan Akbar | | 14-Jul | 14-Jul | | | Data replicated successfully | 5.4 |
+| 5.6 | TC-06: Write to Replica (Negative) | Juan Akbar | | 14-Jul | 14-Jul | | | Read-only error returned | 5.5 |
+| 5.7 | TC-07: Failover — Leader down (Positive) | Juan Akbar | | 14-Jul | 14-Jul | | | Failover successful | 5.6 |
+| 5.8 | TC-08: Recovery — Leader back as Replica (Positive) | Juan Akbar | | 14-Jul | 14-Jul | | | Node D joined as Replica | 5.7 |
+| 5.9 | TC-09: Manual switchover (Positive) | Juan Akbar | | 14-Jul | 14-Jul | | | Switchover successful | 5.8 |
+| 5.10 | TC-10: HAProxy health check (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | Master 200, Replica 503 | 5.9 |
+| 5.11 | TC-11: HAProxy wrong port (Negative) | Juan Akbar | | 15-Jul | 15-Jul | | | Connection timeout/rejected | 5.10 |
+| 5.12 | TC-12: etcd quorum 1 node down (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | Cluster still healthy | 5.11 |
+| 5.13 | TC-13: etcd quorum 2 nodes down (Negative) | Juan Akbar | | 15-Jul | 15-Jul | | | Cluster read-only | 5.12 |
+| 5.14 | TC-14: etcd recovery from quorum loss (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | Quorum restored | 5.13 |
+| 5.15 | TC-15: VIP movement — MASTER down (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | VIP moved to BACKUP | 5.14 |
+| 5.16 | TC-16: VIP movement — MASTER back (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | VIP returned to MASTER | 5.15 |
+| 5.17 | TC-17: Superuser postgres from network (Negative) | Juan Akbar | | 15-Jul | 15-Jul | | | Connection rejected | 5.16 |
+| 5.18 | TC-18: Total recovery (all nodes down) (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | Cluster fully recovered | 5.17 |
+| 5.19 | TC-19: Patroni REST API (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | All endpoints valid | 5.18 |
+| 5.20 | TC-20: Backup & restore pgBackRest (Positive) | Juan Akbar | | 15-Jul | 15-Jul | | | Backup & restore OK | 5.19 |
+| **M5** | **Milestone: All testing scenarios passed (20 TCs)** | | | **15-Jul** | **15-Jul** | | | **Testing OK** | |
 | | **Phase 6 — Documentation & Handover** | | | **15-Jul** | **15-Jul** | | | | |
 | 6.1 | Finalize configuration documentation | Juan Akbar | | 15-Jul | 15-Jul | | | Final config docs | 5.8 |
 | 6.2 | Document backup strategy | Juan Akbar | | 15-Jul | 15-Jul | | | Backup procedure doc | 5.8 |
