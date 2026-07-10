@@ -32,7 +32,7 @@ dnf clean all
 
 ```bash
 dnf install --disablerepo='*' --enablerepo=local-offline -y \
-  etcd haproxy keepalived chrony firewalld
+  etcd haproxy keepalived chrony firewalld net-snmp-utils
 ```
 
 ## 4. Konfigurasi etcd
