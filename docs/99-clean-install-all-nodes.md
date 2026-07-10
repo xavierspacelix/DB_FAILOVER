@@ -90,7 +90,7 @@ systemctl disable haproxy keepalived
 rm -f /etc/yum.repos.d/local-offline.repo
 
 # Hapus log instalasi
-rm -f /home/kbbadmin/install.log /home/kbbadmin/pgha-offline-bundle.tar.gz 2>/dev/null
+rm -f /home/kbbadmin/install.log /home/kbbadmin/pgha-offline-bundle-10-Jul-2026.tar.gz 2>/dev/null
 
 # Hapus direktori data postgres jika masih ada
 rm -rf /var/lib/pgsql/16/data /tmp/pgpass /etc/patroni 2>/dev/null

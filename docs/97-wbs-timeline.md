@@ -16,7 +16,7 @@
 | 1.3 | Verify package availability | Juan Akbar | | 02-Jul | 02-Jul | | | Package list confirmed | 1.2 |
 | 1.4 | Download all RPMs (275 packages) | Juan Akbar | | 03-Jul | 03-Jul | | | 274 RPMs downloaded | 1.1–1.3 |
 | 1.5 | Build local repo (createrepo_c) | Juan Akbar | | 03-Jul | 03-Jul | | | Local repo (repodata) | 1.4 |
-| 1.6 | Package bundle (pgha-offline-bundle.tar.gz) | Juan Akbar | | 03-Jul | 03-Jul | | | offline bundle 134MB | 1.5 |
+| 1.6 | Package bundle (pgha-offline-bundle-10-Jul-2026.tar.gz) | Juan Akbar | | 03-Jul | 03-Jul | | | offline bundle 134MB | 1.5 |
 | 1.7 | Test offline install on builder VM | Juan Akbar | | 03-Jul | 03-Jul | | | Install test passed | 1.6 |
 | **M1** | **Milestone: Bundle RPM ready for deployment** | | | **03-Jul** | **03-Jul** | | | **Bundle approved** | |
 | | **Phase 2 — Deploy etcd Cluster** | | | **06-Jul** | **08-Jul** | | | | |

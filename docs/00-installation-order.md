@@ -25,7 +25,7 @@
 2. **Node D:** Start Patroni duluan agar jadi Leader.
 3. **Node E:** Start setelah Node D. Patroni auto-join sebagai Replica via streaming replication.
 4. **Node A & B:** Konfigurasi HAProxy + Keepalided paling akhir, setelah replikasi berjalan.
-5. **Bundle:** `pgha-offline-bundle.tar.gz` harus sudah tersedia di setiap node.
+5. **Bundle:** `pgha-offline-bundle-10-Jul-2026.tar.gz` harus sudah tersedia di setiap node.
 6. **Config files:** Semua file config ada di direktori `configs/`. Copy sesuai node masing-masing.
 
 ## Verifikasi Final

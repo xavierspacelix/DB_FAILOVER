@@ -9,13 +9,13 @@
 
 - Rocky Linux 9.7
 - Akses root
-- File `/home/kbbadmin/pgha-offline-bundle.tar.gz` sudah di-copy ke node ini
+- File `/home/kbbadmin/pgha-offline-bundle-10-Jul-2026.tar.gz` sudah di-copy ke node ini
 - File config: `etcd-node-c-10.30.110.116.conf`
 
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
 ```bash
-tar xzf /home/kbbadmin/pgha-offline-bundle.tar.gz -C /home/kbbadmin/
+tar xzf /home/kbbadmin/pgha-offline-bundle-10-Jul-2026.tar.gz -C /home/kbbadmin/
 
 cat <<EOF > /etc/yum.repos.d/local-offline.repo
 [local-offline]

@@ -106,14 +106,14 @@ createrepo_c /root/offline-rpms
 ### 1.6 Package & transfer
 
 ```bash
-tar czf pgha-offline-bundle.tar.gz offline-rpms offline-pip
+tar czf pgha-offline-bundle-10-Jul-2026.tar.gz offline-rpms offline-pip
 # transfer via scp/rsync ke jump host, atau media fisik (USB/DVD) ke jaringan air-gapped
 ```
 
 ### 1.7 Test install di 1 VM offline (disconnect network)
 
 ```bash
-tar xzf pgha-offline-bundle.tar.gz -C /root/
+tar xzf pgha-offline-bundle-10-Jul-2026.tar.gz -C /root/
 cat <<EOF > /etc/yum.repos.d/local-offline.repo
 [local-offline]
 name=Local Offline Repo

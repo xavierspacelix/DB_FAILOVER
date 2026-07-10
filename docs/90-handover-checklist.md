@@ -62,7 +62,7 @@ etcdctl endpoint health --cluster -w table
 | HAProxy config | `/etc/haproxy/haproxy.cfg` (Node A & B) |
 | Keepalived config | `/etc/keepalived/keepalived.conf` (Node A & B) |
 | Offline repo | `/home/kbbadmin/offline-rpms/` |
-| Bundle RPM | `/home/kbbadmin/pgha-offline-bundle.tar.gz` |
+| Bundle RPM | `/home/kbbadmin/pgha-offline-bundle-10-Jul-2026.tar.gz` |
 | Project docs | `/home/xavier/DBFAILOVER/docs/` |
 | Config files | `/home/xavier/DBFAILOVER/configs/` |
 

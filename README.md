@@ -36,7 +36,7 @@ Deploy **PostgreSQL 16.14** HA Cluster dengan **Patroni 4.1.3** + **etcd 3.6** +
 |------|-----|
 | `configs/` | File konfigurasi siap pakai per node |
 | `docs/` | Panduan instalasi + testing + clean install |
-| `pgha-offline-bundle.tar.gz` | Bundle RPM 274 packages (offline repo) |
+| `pgha-offline-bundle-10-Jul-2026.tar.gz` | Bundle RPM 274 packages (offline repo) |
 
 ### Config Files
 
