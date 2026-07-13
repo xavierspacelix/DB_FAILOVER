@@ -31,7 +31,7 @@ dnf clean all
 ## 3. Install Paket
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline -y \
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y \
   etcd chrony firewalld
 ```
 

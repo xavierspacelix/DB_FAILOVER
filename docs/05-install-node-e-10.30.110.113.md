@@ -33,7 +33,7 @@ dnf clean all
 ## 3. Install Paket
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline -y \
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y \
   postgresql16-server postgresql16-contrib patroni patroni-etcd \
   chrony firewalld
 ```

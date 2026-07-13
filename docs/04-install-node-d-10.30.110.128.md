@@ -94,7 +94,7 @@ dnf clean all
 > **PG 15 sudah terinstall. Sekarang install PG 16 dan Patroni.**
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline -y \
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y \
   patroni patroni-etcd postgresql16-server chrony firewalld
 ```
 
