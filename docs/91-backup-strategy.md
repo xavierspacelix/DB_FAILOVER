@@ -9,7 +9,7 @@
 ### Install
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y pgbackrest
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing --replacefiles -y pgbackrest
 ```
 
 ### Konfigurasi

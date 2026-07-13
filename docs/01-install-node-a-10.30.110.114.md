@@ -31,7 +31,7 @@ dnf clean all
 ## 3. Install Paket
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y \
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing --replacefiles -y \
   etcd haproxy keepalived chrony firewalld net-snmp-utils
 ```
 
