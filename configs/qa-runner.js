@@ -5,7 +5,7 @@
 
 const net = require('net');
 const http = require('http');
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
 
 let pg;
 try { pg = require('pg'); } catch { }
@@ -16,8 +16,8 @@ const CFG = {
   nodeE: '10.30.110.113',
   etcd1: '10.30.110.114',
   user: 'groupware',
-  pass: 'KBBgroupware@2025!',
-  db: 'kb_groupware',
+  pass: 'KBBgroupware@2025!)',
+  db: 'kb_groupware_2',
   dbTest: 'qa_test',
 };
 
@@ -99,15 +99,18 @@ async function main() {
 
   // TC-05: Data replication
   console.log('TC-05: Replikasi data...');
-  const r5a = await sql(CFG.vip, `DROP TABLE IF EXISTS qa_test CASCADE; CREATE TABLE qa_test (id serial, name text); INSERT INTO qa_test (name) VALUES ('test1'),('test2'); SELECT COUNT(*) AS n FROM qa_test`);
-  const insertOk = r5a.rows && r5a.rows[0] && r5a.rows[0].n == 2;
+  await sql(CFG.vip, `DROP TABLE IF EXISTS qa_test`);
+  const r5a = await sql(CFG.vip, `CREATE TABLE qa_test (id serial, name text)`);
+  const r5b = await sql(CFG.vip, `INSERT INTO qa_test (name) VALUES ('test1'),('test2')`);
+  const r5c = await sql(CFG.vip, `SELECT COUNT(*) AS n FROM qa_test`);
+  const insertOk = r5c.rows && r5c.rows[0] && r5c.rows[0].n == 2;
   if (insertOk) {
-    await new Promise(r => setTimeout(r, 2000)); // wait for replication
-    const r5b = await sql(CFG.nodeE, 'SELECT COUNT(*) AS n FROM qa_test');
-    const replicated = r5b.rows && r5b.rows[0].n == 2;
-    result('TC-05', 'Positive', 'Replikasi data', replicated, replicated ? 'Data tereplikasi (2 rows)' : (r5b.err || 'Data tidak tereplikasi'));
+    await new Promise(r => setTimeout(r, 2000));
+    const r5d = await sql(CFG.nodeE, 'SELECT COUNT(*) AS n FROM qa_test');
+    const replicated = r5d.rows && r5d.rows[0].n == 2;
+    result('TC-05', 'Positive', 'Replikasi data', replicated, replicated ? 'Data tereplikasi (2 rows)' : (r5d.err || 'Data tidak tereplikasi'));
   } else {
-    result('TC-05', 'Positive', 'Replikasi data', false, r5a.err || 'Insert gagal');
+    result('TC-05', 'Positive', 'Replikasi data', false, r5a.err || r5b.err || r5c.err || 'Insert gagal');
   }
 
   // TC-10: HAProxy health check
@@ -137,7 +140,7 @@ async function main() {
   // TC-02: Wrong user
   console.log('TC-02: Koneksi dengan user salah...');
   const r2 = await sql(CFG.vip, 'SELECT 1', 'user_tidak_ada', 'wrong_pass');
-  const denied2 = r2.err && r2.err.includes('does not exist');
+  const denied2 = r2.err && (r2.err.includes('does not exist') || r2.err.includes('pg_hba'));
   result('TC-02', 'Negative', 'User salah ditolak', denied2, denied2 ? 'Ditolak sesuai harapan' : (r2.err || 'Seharusnya ditolak'));
 
   // TC-06: Write to Replica
