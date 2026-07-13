@@ -10,7 +10,7 @@
 - Rocky Linux 9.7
 - Akses root
 - File `/home/kbbadmin/pgha-offline-bundle-10-Jul-2026.tar.gz` sudah di-copy ke node ini
-- File config: `etcd-node-a-10.30.110.114.conf`, `haproxy.cfg`, `keepalived-master-10.30.110.114.conf`
+- File config: `etcd-node-a-10.30.110.114.conf`, `haproxy.cfg`, `haproxy-tmpfiles.conf`, `keepalived-master-10.30.110.114.conf`
 
 ## 2. Ekstrak Bundle & Setup Repo Lokal
 
@@ -78,6 +78,8 @@ HAProxy 2.8 health check via Patroni REST API (`/master` endpoint):
 
 ```bash
 cp /home/kbbadmin/haproxy.cfg /etc/haproxy/haproxy.cfg
+cp /home/kbbadmin/haproxy-tmpfiles.conf /etc/tmpfiles.d/haproxy.conf
+systemd-tmpfiles --create /etc/tmpfiles.d/haproxy.conf
 ```
 
 Konfigurasi:

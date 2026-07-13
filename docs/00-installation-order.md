@@ -12,8 +12,8 @@
 | 1 | A, B, C | .12, .13, .14 | etcd cluster (bersamaan) | `configs/etcd-node-*.conf` |
 | 2 | D | .10 | Patroni + PostgreSQL (Leader) | `configs/patroni-node-d.yml` |
 | 3 | E | .11 | Patroni + PostgreSQL (Replica) | `configs/patroni-node-e.yml` |
-| 4 | A | .12 | HAProxy + Keepalived MASTER | `configs/haproxy.cfg`, `configs/keepalived-master.conf` |
-| 5 | B | .13 | HAProxy + Keepalived BACKUP | `configs/haproxy.cfg`, `configs/keepalived-backup.conf` |
+| 4 | A | .12 | HAProxy + Keepalived MASTER | `configs/haproxy.cfg`, `configs/haproxy-tmpfiles.conf`, `configs/keepalived-master.conf` |
+| 5 | B | .13 | HAProxy + Keepalived BACKUP | `configs/haproxy.cfg`, `configs/haproxy-tmpfiles.conf`, `configs/keepalived-backup.conf` |
 | 6 | - | .15 | Verifikasi end-to-end via VIP | - |
 | - | - | - | **User management** | `docs/06-user-management.md` |
 | - | - | - | **Testing** | `docs/98-testing-scenarios.md` |
