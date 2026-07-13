@@ -1,60 +1,58 @@
 #!/usr/bin/env node
-// Test koneksi database ke PG-HA Cluster
-// Usage: node test-koneksi.js
-// Install: npm install pg
+// Test koneksi PG-HA Cluster
+// node test-koneksi.js
+// npm install pg  (untuk SQL test)
 
-const { Client } = require('pg');
+const net = require('net');
 
-const DB_CONFIG = {
-  host: '10.30.110.112',
-  port: 5432,
-  user: 'groupware',
-  password: 'KBBgroupware@2025!',
-  database: 'kb_groupware',
-};
+const TESTS = [
+  { label: 'VIP (HAProxy)',   host: '10.30.110.112' },
+  { label: 'Node D (Leader)', host: '10.30.110.128' },
+  { label: 'Node E (Replica)',host: '10.30.110.113' },
+];
 
-async function testKoneksi(label, config) {
-  const client = new Client(config);
+function testTCP(host, port) {
+  return new Promise(resolve => {
+    const s = new net.Socket();
+    s.setTimeout(3000);
+    s.on('connect', () => { s.destroy(); resolve(true); });
+    s.on('error', () => resolve(false));
+    s.on('timeout', () => { s.destroy(); resolve(false); });
+    s.connect(port, host);
+  });
+}
+
+async function testSQL(host) {
+  let pg;
+  try { pg = require('pg'); } catch { return 'skip'; }
+  const client = new pg.Client({ host, port: 5432, user: 'groupware', password: 'KBBgroupware@2025!', database: 'kb_groupware' });
   try {
     await client.connect();
-    const res = await client.query('SELECT 1 AS test, pg_is_in_recovery(), version()');
-    const row = res.rows[0];
-    console.log(`  [OK] ${label}`);
-    console.log(`       Test: ${row.test}`);
-    console.log(`       Role: ${row.pg_is_in_recovery ? 'Replica' : 'LEADER'}`);
-    console.log(`       Versi: ${row.version.split(',')[0]}`);
+    const r = (await client.query("SELECT 1, pg_is_in_recovery(), version()")).rows[0];
     await client.end();
-    return true;
+    return `OK | Role: ${r.pg_is_in_recovery ? 'Replica' : 'LEADER'} | ${r.version.split(',')[0]}`;
   } catch (e) {
-    console.log(`  [FAIL] ${label}: ${e.message}`);
-    return false;
+    return `FAIL - ${e.message}`;
   }
 }
 
 async function main() {
   console.log('=== TEST KONEKSI PG-HA CLUSTER ===\n');
 
-  console.log('1. Via VIP (10.30.110.112):');
-  await testKoneksi('VIP -> HAProxy -> Leader', DB_CONFIG);
+  for (const t of TESTS) {
+    const tcp = await testTCP(t.host, 5432);
+    const tcpStr = tcp ? 'OK' : 'FAIL';
+    console.log(`${t.label} (${t.host}:5432) TCP:${tcpStr}`);
 
-  console.log('\n2. Direct ke Node D (Leader):');
-  await testKoneksi('Node D', { ...DB_CONFIG, host: '10.30.110.128' });
-
-  console.log('\n3. Direct ke Node E (Replica):');
-  await testKoneksi('Node E', { ...DB_CONFIG, host: '10.30.110.113' });
-
-  console.log('\n4. Test data:');
-  try {
-    const client = new Client(DB_CONFIG);
-    await client.connect();
-    const res = await client.query("SELECT count(*) as total FROM pg_database WHERE datname LIKE 'kb_%'");
-    console.log(`  [OK] Database kb_* ditemukan: ${res.rows[0].total}`);
-    await client.end();
-  } catch (e) {
-    console.log(`  [FAIL] ${e.message}`);
+    if (tcp) {
+      const sql = await testSQL(t.host);
+      if (sql !== 'skip') console.log(`       SQL: ${sql}`);
+      else console.log(`       SQL: skip (npm install pg)`);
+    }
+    console.log('');
   }
 
-  console.log('\n=== SELESAI ===');
+  console.log('=== SELESAI ===');
 }
 
 main();
