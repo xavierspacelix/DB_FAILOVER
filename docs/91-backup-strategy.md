@@ -9,7 +9,10 @@
 ### Install
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing --setopt=tsflags=replacefiles -y pgbackrest
+# Remove conflicting packages dari OS versi lama
+rpm -e --nodeps openssl-fips-provider-so 2>/dev/null || true
+
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y pgbackrest
 ```
 
 ### Konfigurasi

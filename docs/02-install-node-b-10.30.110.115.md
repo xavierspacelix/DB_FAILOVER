@@ -31,7 +31,10 @@ dnf clean all
 ## 3. Install Paket
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing --setopt=tsflags=replacefiles -y \
+# Remove conflicting packages dari OS versi lama
+rpm -e --nodeps openssl-fips-provider-so 2>/dev/null || true
+
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y \
   etcd haproxy keepalived chrony firewalld net-snmp-utils
 ```
 

@@ -94,7 +94,10 @@ dnf clean all
 > **PG 15 sudah terinstall. Sekarang install PG 16 dan Patroni.**
 
 ```bash
-dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing --setopt=tsflags=replacefiles -y \
+# Remove conflicting packages dari OS versi lama
+rpm -e --nodeps openssl-fips-provider-so 2>/dev/null || true
+
+dnf install --disablerepo='*' --enablerepo=local-offline --allowerasing -y \
   patroni patroni-etcd postgresql16-server chrony firewalld
 ```
 
