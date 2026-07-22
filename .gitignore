@@ -4,3 +4,5 @@ offline-rpms/
 node_modules/
 pgha-offline-bundle-*.tar.gz
 offline-rpms/
+pgha-offline-bundle*.tar.gz
+offline-rpms/
