@@ -37,20 +37,28 @@ process-max=2
 
 ### Integrasi dengan Patroni
 
-Tambah parameter di Patroni config (`/etc/patroni/patroni.yml`):
+Parameter archive sudah include di `bootstrap.dcs.postgresql.parameters`:
 
 ```yaml
-postgresql:
-    parameters:
-        archive_mode: on
-        archive_command: 'pgbackrest --stanza=pg_cluster archive-push %p'
-        archive_timeout: 60
+archive_mode: on
+archive_command: 'pgbackrest --stanza=pg_cluster archive-push %p'
+archive_timeout: 60
+restore_command: 'pgbackrest --stanza=pg_cluster archive-get %f "%p"'
+wal_keep_size: 32GB
 ```
 
-Reload Patroni:
+Reload (untuk reloadable params):
 
 ```bash
 patronictl -c /etc/patroni/patroni.yml reload node-d
+patronictl -c /etc/patroni/patroni.yml reload node-e
+```
+
+Restart (untuk `archive_mode` yang butuh restart):
+
+```bash
+patronictl -c /etc/patroni/patroni.yml restart node-e
+patronictl -c /etc/patroni/patroni.yml restart node-d
 ```
 
 Buat stanza:

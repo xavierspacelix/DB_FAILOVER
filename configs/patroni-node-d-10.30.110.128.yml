@@ -1,8 +1,5 @@
-# Patroni 4.1.3 — Node D (10.30.110.128) — Leader dengan data existing
+# Patroni 4.1.3 — Node D (10.30.110.128) — Leader
 # Referensi: https://patroni.readthedocs.io/en/latest/yaml_configuration.html
-#
-# CATATAN: Node ini sudah punya database existing.
-# Patroni akan mendeteksi data di data_dir dan mengadopsinya (bukan buat baru).
 
 scope: pg_cluster
 namespace: /db/
@@ -24,20 +21,81 @@ bootstrap:
         loop_wait: 10
         retry_timeout: 10
         maximum_lag_on_failover: 1048576
+        synchronous_mode: true
+        synchronous_mode_strict: false
+        synchronous_node_count: 1
+        primary_start_timeout: 300
         postgresql:
             use_pg_rewind: true
+            remove_data_directory_on_rewind_failure: false
+            use_slots: true
             parameters:
-                max_connections: 200
-                max_prepared_transactions: 0
+                archive_mode: on
+                archive_command: 'pgbackrest --stanza=pg_cluster archive-push %p'
+                archive_timeout: 60
+                restore_command: 'pgbackrest --stanza=pg_cluster archive-get %f "%p"'
                 wal_level: replica
+                wal_log_hints: "on"
+                wal_keep_size: 32GB
+                wal_buffers: 16MB
                 hot_standby: "on"
+                max_connections: 500
+                max_prepared_transactions: 200
                 max_wal_senders: 10
                 max_replication_slots: 10
-                wal_log_hints: "on"
-                shared_buffers: 256MB
-
-    # initdb TIDAK digunakan — data sudah ada
-    # users TIDAK digunakan — user sudah ada di DB existing
+                max_worker_processes: 16
+                max_parallel_maintenance_workers: 8
+                max_locks_per_transaction: 512
+                superuser_reserved_connections: 10
+                shared_buffers: 16GB
+                effective_cache_size: 48GB
+                maintenance_work_mem: 6GB
+                work_mem: 32MB
+                checkpoint_timeout: 120min
+                checkpoint_completion_target: 0.9
+                max_wal_size: 16GB
+                min_wal_size: 2GB
+                cpu_index_tuple_cost: 0.003
+                cpu_tuple_cost: 0.09
+                random_page_cost: 0.5
+                seq_page_cost: 1
+                effective_io_concurrency: 200
+                from_collapse_limit: 8
+                join_collapse_limit: 8
+                geqo: "off"
+                default_statistics_target: 100
+                cursor_tuple_fraction: 0.05
+                dynamic_shared_memory_type: posix
+                plan_cache_mode: auto
+                jit: "off"
+                bgwriter_delay: 10ms
+                bgwriter_flush_after: 2048kB
+                bgwriter_lru_maxpages: 10000
+                bgwriter_lru_multiplier: 4.0
+                autovacuum: "on"
+                autovacuum_vacuum_threshold: 500
+                autovacuum_vacuum_scale_factor: 0.1
+                autovacuum_vacuum_cost_limit: 500
+                autovacuum_worker_slots: 8
+                wal_receiver_timeout: 600000
+                shared_preload_libraries: 'pg_stat_statements,pgaudit,passwordcheck,pg_repack,pg_squeeze,tablefunc,pg_cron,set_user,pg_partman_bgw'
+                log_destination: stderr
+                logging_collector: "on"
+                log_directory: /log/pgcls/postgres
+                log_filename: 'postgresql-%Y-%m-%d_%H%M%S.log'
+                log_file_mode: "0600"
+                log_rotation_age: 1d
+                log_rotation_size: 100MB
+                log_truncate_on_rotation: "on"
+                log_line_prefix: '%m [%p]: [%l-1] db=%d, user=%u, app=%a, client=%r '
+                log_timezone: Asia/Jakarta
+                log_checkpoints: "on"
+                log_connections: "on"
+                timezone: Asia/Jakarta
+                lc_messages: en_US.UTF-8
+                lc_monetary: en_US.UTF-8
+                lc_numeric: en_US.UTF-8
+                lc_time: en_US.UTF-8
 
     pg_hba:
         - host replication replicator 10.30.110.0/24 md5
@@ -62,6 +120,11 @@ postgresql:
             password: rewind_pass
     parameters:
         unix_socket_directories: /var/run/postgresql
+
+watchdog:
+    mode: automatic
+    device: /dev/watchdog
+    safety_margin: 5
 
 tags:
     nofailover: false
